@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta http-equiv = "X-UA-Compatible" content = "IE=edge" />
+        <meta name = "viewport" content = "width=device-width, initial-scale = 1.0" />
+        <meta charset = "utf-8"  />
+        <title>login</title>
+        <link rel = "stylesheet" type = "text/css" href = "login.css" />
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    </head>
+    <body>
+        <div class = "wrapper">
+            <form action = "">
+                <h1>Login</h1>
+                <div class = "user">
+                    <div class = "user-type active" data-role="applicant">Applicant</div>
+                    <div class = "user-type" data-role="employer">Employer</div>
+                </div>
+                <input type="hidden" name="role" id="role" value="applicant">
+                <div class = "input-box">
+                    <input type = "text" placeholder = "Username" required>
+                    <i class='bx  bx-user'  ></i> 
+                </div>
+                <div class = "input-box">
+                    <input type = "password" placeholder = "Password" required>
+                    <i class='bx  bx-lock'  ></i> 
+                </div>
+                <div class = "remember-forget">
+                    <label>
+                        <input type = "checkbox"> Remember me
+                    </label>
+                    <a href = "#">Forget password?</a>
+                </div>
+                <button type = "submit" class = "btn">Login</button>
+                <div class = "register-link">
+                    <p>
+                        Don't have an account?
+                        <a href = "#">Register</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        <script>
+            const usertype = document.querySelectorAll('.user-type');
+            const roleinput = document.getElementById('role');
+            usertype.forEach(el=>{
+                el.addEventListener('click', ()=>{
+                    usertype.forEach(u=>u.classList.remove('active'));
+                    el.classList.add('active');
+                    const role = el.dataset.role;
+                    roleinput.value = role;
+                })
+            });
+        </script>
+    </body>
+</html>
