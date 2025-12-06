@@ -5,12 +5,12 @@
         <meta name = "viewport" content = "width=device-width, initial-scale = 1.0" />
         <meta charset = "utf-8"  />
         <title>login</title>
-        <link rel = "stylesheet" type = "text/css" href = "login.css" />
+        <link rel = "stylesheet" type = "text/css" href = "style.css" />
         <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
     </head>
     <body>
         <div class = "wrapper">
-            <form action = "">
+            <form id="login-form">
                 <h1>Login</h1>
                 <div class = "user">
                     <div class = "user-type active" data-role="applicant">Applicant</div>
@@ -33,9 +33,9 @@
                 </div>
                 <button type = "submit" class = "btn">Login</button>
                 <div class = "register-link">
-                    <p>
+                    <p class="to-register">
                         Don't have an account?
-                        <a href = "#">Register</a>
+                        <a href = "register.html">Register</a>
                     </p>
                 </div>
             </form>
@@ -51,6 +51,61 @@
                     roleinput.value = role;
                 })
             });
+            document.addEventListener('DOMContentLoaded', ()=>{
+                const form = document.getElementById('login-form');
+                form.addEventListener('submit', handlelogin);
+            });
+            async function handlelogin(e){
+                e.preventDefault();
+                const account = document.getElementById('account').value.trim();
+                const password = document.getElementById('password').value;
+                //要改!!!!
+                try {
+                    // 2️⃣ 呼叫後端登入 API
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ account, password })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        // 3️⃣ 後端應該回傳類似：
+                        // { token: 'xxxxx', role: 'applicant' } 或 { token: 'xxxxx', role: 'employer' }
+
+                        const token = data.token;
+                        const role = data.role;
+
+                        if (!token || !role) {
+                        alert('登入回傳格式有問題，請檢查後端。');
+                        return;
+                        }
+
+                        // 4️⃣ 存到 localStorage
+                        localStorage.setItem('token', token);
+                        localStorage.setItem('role', role);
+
+                        // 5️⃣ 依角色導頁
+                        if (role === 'applicant') {
+                        location.href = 'applicant_dashboard.html';
+                        } else if (role === 'employer') {
+                        location.href = 'employer_dashboard.html';
+                        } else {
+                        // 萬一回傳怪角色，就先跳一個預設頁
+                        alert('未知的角色：' + role);
+                        }
+                    } 
+                    else {
+                        // 後端登入失敗，例如帳號或密碼錯誤
+                        alert(data.message || '登入失敗，請確認帳號密碼');
+                    }
+                } 
+                catch (err) {
+                    console.error(err);
+                    alert('連線失敗，請確認伺服器有沒有啟動');
+                }
+            }
         </script>
     </body>
 </html>

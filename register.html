@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+    <head>
+        <meta charset="utf-8" />
+        <title>register</title>
+        <link rel="stylesheet" href="style.css"/> 
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    </head>
+    <body>
+        <div class="wrapper">
+            <h1>Register</h1>
+            <div class = "user">
+                <div class = "user-type active" data-role="applicant">Applicant</div>
+                <div class = "user-type" data-role="employer">Employer</div>
+            </div>
+            <form id="register-form">
+                <input type="hidden" name="role" id="role" value="applicant">
+                <div class="input-box">
+                    <input id="account" type="text" placeholder="Account" required />
+                    <i class='bx  bx-user'  ></i> 
+                </div>
+                <div class="input-box">
+                    <input id="password" type="password" placeholder="Password" required />
+                    <i class='bx  bx-lock'  ></i> 
+                </div>
+                <div class="input-box">
+                    <input id="confirmpassword" type="password" placeholder="Confirm password" required />
+                    <i class='bx  bx-lock'  ></i> 
+                </div>
+                <button type="submit" class="btn">Register</button>
+                <div class="login-link">
+                    <p class="to-login">
+                        Already hvae an account?
+                        <a href="login.html">Login</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        <script>
+            const usertype = document.querySelectorAll('.user-type');
+            const roleinput = document.getElementById('role');
+            usertype.forEach(el=>{
+                el.addEventListener('click', ()=>{
+                    usertype.forEach(u=>u.classList.remove('active'));
+                    el.classList.add('active');
+                    const role = el.dataset.role;
+                    roleinput.value = role;
+                })
+                const form = document.queryElementById('register-form');
+                form.addEventListener('submit', handleRegister);
+            });
+            async function handleRegister(e){
+                e.preventDefault();
+                const role = document.getElementById('role').value;
+                const account = document.getElementById('account').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmpassword = document.getElementById('confirmpassword').value;
+                if(!account || !password || !confirmpassword){
+                    alter('Account and password cannot be empty.');
+                    return;
+                }    
+                if(password != confirmpassword){
+                    alter('Password should be the same as the confirming password.');
+                    return;
+                }
+                //要改!!!!
+                try {
+                    // 2️⃣ 呼叫後端註冊 API（這裡假設你的後端路徑是這個）
+                    const res = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                        account,
+                        password,
+                        role, // applicant / employer
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        // 3️⃣ 註冊成功
+                        alert('註冊成功！請重新登入');
+                        location.href = 'login.html';
+                    } else {
+                        // 4️⃣ 後端回錯誤（例如帳號已存在）
+                        alert(data.message || '註冊失敗，請稍後再試');
+                    }
+                } 
+                catch (err) {
+                    console.error(err);
+                    alert('連線失敗，請確認伺服器有沒有啟動');
+                }
+            }
+        </script>
+    </body>
+</html>

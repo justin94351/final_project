@@ -204,3 +204,23 @@ body::before{
 .register-link p a:hover{
     text-decoration: underline;
 }
+
+.wrapper .login-link{
+    font-size: 14.5px;
+    text-align: center;
+    margin: 20px 0 15px;
+}
+
+.login-link p{
+    display: flex;
+    justify-content: space-between;
+}
+
+.login-link p a{
+    color: #fff;
+    text-decoration: none;
+}
+
+.login-link p a:hover{
+    text-decoration: underline;
+}
