@@ -30,7 +30,7 @@
                 <button type="submit" class="btn">Register</button>
                 <div class="login-link">
                     <p class="to-login">
-                        Already hvae an account?
+                        Already have an account?
                         <a href="login.html">Login</a>
                     </p>
                 </div>
@@ -39,6 +39,7 @@
         <script>
             const usertype = document.querySelectorAll('.user-type');
             const roleinput = document.getElementById('role');
+            const form = document.getElementById('register-form');
             usertype.forEach(el=>{
                 el.addEventListener('click', ()=>{
                     usertype.forEach(u=>u.classList.remove('active'));
@@ -46,9 +47,8 @@
                     const role = el.dataset.role;
                     roleinput.value = role;
                 })
-                const form = document.queryElementById('register-form');
-                form.addEventListener('submit', handleRegister);
-            });
+            }); 
+            form.addEventListener('submit', handleRegister);
             async function handleRegister(e){
                 e.preventDefault();
                 const role = document.getElementById('role').value;
@@ -56,11 +56,11 @@
                 const password = document.getElementById('password').value;
                 const confirmpassword = document.getElementById('confirmpassword').value;
                 if(!account || !password || !confirmpassword){
-                    alter('Account and password cannot be empty.');
+                    alert('Account and password cannot be empty.');
                     return;
                 }    
                 if(password != confirmpassword){
-                    alter('Password should be the same as the confirming password.');
+                    alert('Password should be the same as the confirming password.');
                     return;
                 }
                 //要改!!!!

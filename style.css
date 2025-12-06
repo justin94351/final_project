@@ -25,7 +25,7 @@ body::before{
 }
 
 .wrapper{
-    width: 420px;
+    width: 550px;
     background: transparent;
     border: 2px solid rgba(255, 255, 255, .2);
     backdrop-filter: blur(20px);
@@ -88,11 +88,25 @@ body::before{
     margin-top: 15px;
 }
 
+
 .wrapper .input-box{
     position: relative;
     width: 100%;
     height: 50px;
     margin: 30px 0;
+}
+
+.input-box textarea{
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.15);
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, .2);
+    border-radius: 20px;
+    font-size: 16px;
+    color: #fff;
+    padding: 20px;
+    resize: none;
 }
 
 .input-box input{
@@ -223,4 +237,47 @@ body::before{
 
 .login-link p a:hover{
     text-decoration: underline;
+}
+
+.finalbtn{
+    display: flex;
+    justify-content:space-between;
+}
+
+#description::placeholder {
+    color: #fff;
+}
+
+#description {
+    color: #fff;
+    padding: 12px 20px; /* ← 讓文字靠左上 */
+}
+
+#jobTable {
+    width: 100%;
+    border-collapse: collapse; /* 讓格線更漂亮 */
+}
+
+#jobTable th, 
+#jobTable td {
+    padding: 8px 12px;
+}
+
+#jobTable {
+    margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    overflow: hidden;
+}
+#jobpost {
+    padding: 10px;
+    margin: 10px 20px;
+}
+
+#formTitle {
+    padding: 10px;
+    margin-bottom: -30px;
 }
