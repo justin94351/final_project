@@ -254,13 +254,14 @@ body::before{
 }
 
 #jobTable {
-    width: 100%;
-    border-collapse: collapse; /* 讓格線更漂亮 */
+  width: 100%;
+  border-collapse: collapse;
 }
 
-#jobTable th, 
+#jobTable th,
 #jobTable td {
-    padding: 8px 12px;
+  padding: 8px 12px;
+  text-align: left;
 }
 
 #jobTable {
@@ -272,6 +273,7 @@ body::before{
     border-radius: 10px;
     overflow: hidden;
 }
+
 #jobpost {
     padding: 10px;
     margin: 10px 20px;
@@ -279,5 +281,5 @@ body::before{
 
 #formTitle {
     padding: 10px;
-    margin-bottom: -30px;
+    margin: 10px 20px -30px 20px;
 }
