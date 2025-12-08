@@ -21,6 +21,7 @@
               <th>Title</th>
               <th>Location</th>
               <th>Salary</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -53,6 +54,12 @@
           <div class="input-box">
             <textarea id="description" rows="3" placeholder = "Description" required></textarea>
           </div>
+          <div class="input-box">
+            <select id="status" required>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
           <div class="finalbtn">
             <button type="submit" id="submitBtn" class="btn">Create</button>
             <button type="button" id="cancelEditBtn" style="display:none; color: #fff" class="btn">Cancel</button>
@@ -64,7 +71,7 @@
 
     <script>
       // 1. 取得 token / role，簡單權限檢查
-      /*const token = localStorage.getItem('token');
+      /*const token = localStorage.getItem('token') || '';
       const role = localStorage.getItem('role');
 
       if (!token || role !== 'employer') {
@@ -84,7 +91,7 @@
       const submitBtn      = document.getElementById('submitBtn');
       const cancelEditBtn  = document.getElementById('cancelEditBtn');
       const logoutBtn      = document.getElementById('logoutBtn');
-
+      const statusSelect   = document.getElementById('status');
       // 3. 登出
       logoutBtn.addEventListener('click', () => {
         localStorage.clear();
@@ -120,6 +127,7 @@
               <td>${job.title}</td>
               <td>${job.location}</td>
               <td>${job.salary}</td>
+              <td>${job.status}</td>
               <td>
                 <button class="editBtn" data-id="${job.id}">Edit</button>
                 <button class="deleteBtn" data-id="${job.id}">Delete</button>
@@ -152,7 +160,8 @@
           title:      titleInput.value.trim(),
           location:   locationInput.value.trim(),
           salary:     Number(salaryInput.value),
-          description: descInput.value.trim()
+          description: descInput.value.trim(),
+          status:      statusSelect.value 
         };
 
         const jobId = jobIdInput.value;
@@ -241,6 +250,7 @@
           locationInput.value = job.location;
           salaryInput.value  = job.salary;
           descInput.value    = job.description;
+          statusSelect.value  = job.status || 'Open';
 
           formTitle.textContent = 'Edit Job';
           submitBtn.textContent = 'Update';
@@ -259,6 +269,7 @@
         locationInput.value  = '';
         salaryInput.value    = '';
         descInput.value      = '';
+        statusSelect.value   = 'Open'; 
         formTitle.textContent = 'Create New Job';
         submitBtn.textContent = 'Create';
         cancelEditBtn.style.display = 'none';
