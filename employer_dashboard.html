@@ -9,7 +9,6 @@
   <body>
     <div class="wrapper">
       <h1>Employer Dashboard</h1>
-      
 
       <!-- 職缺列表 -->
       <section>
@@ -31,6 +30,25 @@
         </table>
       </section>
 
+      <!-- 應徵者列表 -->
+      <section>
+        <h2 id="appTitle">Applicants</h2>
+        <table border="1" id="appTable">
+          <thead>
+            <tr>
+              <th>Application Id</th>
+              <th>Job Id</th>
+              <th>Applicant</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 用 JS 填資料 -->
+          </tbody>
+        </table>
+      </section>
+
       <!-- 新增 / 編輯職缺 -->
       <section>
         <h2 id="formTitle">Create New Job</h2>
@@ -38,31 +56,34 @@
           <input type="hidden" id="jobId">
 
           <div class="input-box">
-            <input type="text" id="title" placeholder = "Title" required>
-            <i class='bx bx-text'></i>
+            <input type="text" id="title" placeholder="Title" required>
+            <i class="bx bx-text"></i>
           </div>
 
           <div class="input-box">
-            <input type="text" id="location" placeholder = "Location" required>
-            <i class='bx bx-map'></i>
+            <input type="text" id="location" placeholder="Location" required>
+            <i class="bx bx-map"></i>
           </div>
 
           <div class="input-box">
-            <input type="number" id="salary" placeholder = "Salary" required>
-            <i class='bx  bx-dollar'></i> 
+            <input type="number" id="salary" placeholder="Salary" required>
+            <i class="bx bx-dollar"></i>
           </div>
+
           <div class="input-box">
-            <textarea id="description" rows="3" placeholder = "Description" required></textarea>
+            <textarea id="description" rows="3" placeholder="Description" required></textarea>
           </div>
+
           <div class="input-box">
             <select id="status" required>
               <option value="Open">Open</option>
               <option value="Closed">Closed</option>
             </select>
           </div>
+
           <div class="finalbtn">
             <button type="submit" id="submitBtn" class="btn">Create</button>
-            <button type="button" id="cancelEditBtn" style="display:none; color: #fff" class="btn">Cancel</button>
+            <button type="button" id="cancelEditBtn" style="display:none; color:#fff" class="btn">Cancel</button>
             <button type="button" id="logoutBtn" class="btn">Logout</button>
           </div>
         </form>
@@ -70,16 +91,19 @@
     </div>
 
     <script>
-      // 1. 取得 token / role，簡單權限檢查
-      /*const token = localStorage.getItem('token') || '';
-      const role = localStorage.getItem('role');
+      // 1. 取得 token / role（如果你有做登入）
+      const token = localStorage.getItem('token') || '';
+      const role  = localStorage.getItem('role');
 
+      // 如果你已經有 employer 的登入流程，可以打開這段：
+      /*
       if (!token || role !== 'employer') {
         alert('You are not authorized to view this page.');
         window.location.href = 'login.html';
-      }*/
+      }
+      */
 
-      // 2. 抓 DOM 元素（命名統一用小駝峰）
+      // 2. 抓 DOM 元素
       const jobTableBody   = document.querySelector('#jobTable tbody');
       const jobForm        = document.getElementById('jobForm');
       const jobIdInput     = document.getElementById('jobId');
@@ -87,25 +111,31 @@
       const locationInput  = document.getElementById('location');
       const salaryInput    = document.getElementById('salary');
       const descInput      = document.getElementById('description');
+      const statusSelect   = document.getElementById('status');
+
       const formTitle      = document.getElementById('formTitle');
       const submitBtn      = document.getElementById('submitBtn');
       const cancelEditBtn  = document.getElementById('cancelEditBtn');
       const logoutBtn      = document.getElementById('logoutBtn');
-      const statusSelect   = document.getElementById('status');
+
+      const appTableBody   = document.querySelector('#appTable tbody');
+      const appTitle       = document.getElementById('appTitle');
+      let currentJobId     = null;   // 目前正在查看應徵者的 job_id
+
       // 3. 登出
       logoutBtn.addEventListener('click', () => {
         localStorage.clear();
         window.location.href = 'login.html';
       });
 
-      // 4. 載入職缺列表 (Read)
+      // 4. 載入職缺列表 (Read all jobs)
       async function loadJobs() {
-        jobTableBody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+        jobTableBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
 
         try {
           const res = await fetch('/api/employer/jobs', {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': token ? `Bearer ${token}` : ''
             }
           });
 
@@ -114,7 +144,7 @@
           const jobs = await res.json();
 
           if (!jobs || jobs.length === 0) {
-            jobTableBody.innerHTML = '<tr><td colspan="5">No jobs yet.</td></tr>';
+            jobTableBody.innerHTML = '<tr><td colspan="6">No jobs yet.</td></tr>';
             return;
           }
 
@@ -122,6 +152,7 @@
           jobs.forEach(job => {
             const tr = document.createElement('tr');
 
+            // 假設後端回傳欄位：id / title / location / salary / status
             tr.innerHTML = `
               <td>${job.id}</td>
               <td>${job.title}</td>
@@ -131,13 +162,14 @@
               <td>
                 <button class="editBtn" data-id="${job.id}">Edit</button>
                 <button class="deleteBtn" data-id="${job.id}">Delete</button>
+                <button class="viewAppsBtn" data-id="${job.id}">Applicants</button>
               </td>
             `;
 
             jobTableBody.appendChild(tr);
           });
 
-          // 綁定 edit / delete 按鈕事件
+          // 綁定 edit / delete / applicants 按鈕事件
           document.querySelectorAll('.editBtn').forEach(btn => {
             btn.addEventListener('click', () => startEdit(btn.dataset.id));
           });
@@ -146,9 +178,13 @@
             btn.addEventListener('click', () => deleteJob(btn.dataset.id));
           });
 
+          document.querySelectorAll('.viewAppsBtn').forEach(btn => {
+            btn.addEventListener('click', () => loadApplicants(btn.dataset.id));
+          });
+
         } catch (err) {
           console.error(err);
-          jobTableBody.innerHTML = '<tr><td colspan="5">Error loading jobs.</td></tr>';
+          jobTableBody.innerHTML = '<tr><td colspan="6">Error loading jobs.</td></tr>';
         }
       }
 
@@ -157,11 +193,11 @@
         e.preventDefault();
 
         const jobData = {
-          title:      titleInput.value.trim(),
-          location:   locationInput.value.trim(),
-          salary:     Number(salaryInput.value),
+          title:       titleInput.value.trim(),
+          location:    locationInput.value.trim(),
+          salary:      Number(salaryInput.value),
           description: descInput.value.trim(),
-          status:      statusSelect.value 
+          status:      statusSelect.value
         };
 
         const jobId = jobIdInput.value;
@@ -174,7 +210,7 @@
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': token ? `Bearer ${token}` : ''
               },
               body: JSON.stringify(jobData)
             });
@@ -184,7 +220,7 @@
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': token ? `Bearer ${token}` : ''
               },
               body: JSON.stringify(jobData)
             });
@@ -214,17 +250,25 @@
           const res = await fetch(`/api/employer/jobs/${id}`, {
             method: 'DELETE',
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': token ? `Bearer ${token}` : ''
             }
           });
 
           if (!res.ok) {
-            alert('Failed to delete');
+            const data = await res.json().catch(() => ({}));
+            alert(data.message || 'Failed to delete');
             return;
           }
 
           alert('Deleted!');
           loadJobs();
+
+          // 如果正在看這個 job 的 applicants，就清空列表
+          if (currentJobId === id) {
+            currentJobId = null;
+            appTitle.textContent = 'Applicants';
+            appTableBody.innerHTML = '<tr><td colspan="5">No job selected.</td></tr>';
+          }
 
         } catch (err) {
           console.error(err);
@@ -232,12 +276,12 @@
         }
       }
 
-      // 7. 開始編輯 (Read 單一職缺 + 填入表單)
+      // 7. 開始編輯 (讀單一職缺 + 填入表單)
       async function startEdit(id) {
         try {
           const res = await fetch(`/api/employer/jobs/${id}`, {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': token ? `Bearer ${token}` : ''
             }
           });
 
@@ -245,12 +289,12 @@
 
           const job = await res.json();
 
-          jobIdInput.value   = job.id;
-          titleInput.value   = job.title;
-          locationInput.value = job.location;
-          salaryInput.value  = job.salary;
-          descInput.value    = job.description;
-          statusSelect.value  = job.status || 'Open';
+          jobIdInput.value     = job.id;
+          titleInput.value     = job.title;
+          locationInput.value  = job.location;
+          salaryInput.value    = job.salary;
+          descInput.value      = job.description;
+          statusSelect.value   = job.status || 'Open';
 
           formTitle.textContent = 'Edit Job';
           submitBtn.textContent = 'Update';
@@ -262,14 +306,108 @@
         }
       }
 
-      // 8. 取消編輯 & 重設表單
+      // 8. 載入某職缺的應徵者列表
+      async function loadApplicants(jobId) {
+        currentJobId = jobId;
+        appTitle.textContent = `Applicants for Job ${jobId}`;
+        appTableBody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+
+        try {
+          const res = await fetch(`/api/employer/jobs/${jobId}/applications`, {
+            headers: {
+              'Authorization': token ? `Bearer ${token}` : ''
+            }
+          });
+
+          if (!res.ok) {
+            throw new Error('Failed to fetch applicants');
+          }
+
+          const apps = await res.json();
+
+          if (!apps || apps.length === 0) {
+            appTableBody.innerHTML = '<tr><td colspan="5">No applicants yet.</td></tr>';
+            return;
+          }
+
+          appTableBody.innerHTML = '';
+          apps.forEach(app => {
+            const tr = document.createElement('tr');
+
+            // 假設後端回傳欄位：application_id / job_id / applicant_name / application_status
+            tr.innerHTML = `
+              <td>${app.application_id}</td>
+              <td>${app.job_id}</td>
+              <td>${app.applicant_name || ''}</td>
+              <td>${app.application_status}</td>
+              <td>
+                <button class="acceptBtn" data-app-id="${app.application_id}">Accept</button>
+                <button class="rejectBtn" data-app-id="${app.application_id}">Reject</button>
+              </td>
+            `;
+
+            appTableBody.appendChild(tr);
+          });
+
+          // 綁定 Accept / Reject 按鈕事件
+          document.querySelectorAll('.acceptBtn').forEach(btn => {
+            btn.addEventListener('click', () =>
+              updateApplicationStatus(btn.dataset.appId, 'Accepted')
+            );
+          });
+
+          document.querySelectorAll('.rejectBtn').forEach(btn => {
+            btn.addEventListener('click', () =>
+              updateApplicationStatus(btn.dataset.appId, 'Rejected')
+            );
+          });
+
+        } catch (err) {
+          console.error(err);
+          appTableBody.innerHTML = '<tr><td colspan="5">Error loading applicants.</td></tr>';
+        }
+      }
+
+      // 9. 更新某申請的狀態 (Accepted / Rejected)
+      async function updateApplicationStatus(applicationId, newStatus) {
+        if (!confirm(`Set this application to "${newStatus}"?`)) return;
+
+        try {
+          const res = await fetch(`/api/employer/applications/${applicationId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? `Bearer ${token}` : ''
+            },
+            body: JSON.stringify({ status: newStatus })
+          });
+
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            alert(data.message || 'Failed to update application status');
+            return;
+          }
+
+          alert(`Application set to ${newStatus}`);
+          if (currentJobId) {
+            loadApplicants(currentJobId); // 更新當前職缺的 applicant 列表
+          }
+
+        } catch (err) {
+          console.error(err);
+          alert('Network error');
+        }
+      }
+
+      // 10. 取消編輯 & 重設表單
       function resetForm() {
         jobIdInput.value     = '';
         titleInput.value     = '';
         locationInput.value  = '';
         salaryInput.value    = '';
         descInput.value      = '';
-        statusSelect.value   = 'Open'; 
+        statusSelect.value   = 'Open';
+
         formTitle.textContent = 'Create New Job';
         submitBtn.textContent = 'Create';
         cancelEditBtn.style.display = 'none';
@@ -277,7 +415,7 @@
 
       cancelEditBtn.addEventListener('click', resetForm);
 
-      // 9. 頁面載入時，先載入職缺
+      // 11. 頁面載入時，先載入職缺
       loadJobs();
     </script>
   </body>

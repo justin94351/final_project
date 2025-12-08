@@ -79,6 +79,13 @@ JOIN application_information AS ai ON ui.user_id = ai.user_id
 Join application AS a ON a.application_id = ai.application_id
 where ui.account = $1;
 -----------------------------------------
+--展示user的application
+SELECT a.job_id, ui.first_name, ui.last_name, ai.education, ai.work_experience, ai.expected_job, ai.other_information, a.application_status
+FROM user_information AS ui
+JOIN application_information AS ai ON ai.user_id = ui.user_id
+JOIN application AS a ON a.application_id = ai.application_id
+WHERE ui.user_id = $1 AND  a.job_id = $2;
+---------------------------------
 
 --展示job的資訊
 SELECT jp.job_id, jp.title, jp.status, jp.salary, jp.job_location, jp.job_description, jp.benefits, jp.other_information, a.application_status
