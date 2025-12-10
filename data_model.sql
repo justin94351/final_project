@@ -22,6 +22,27 @@ LEFT Join application AS a ON a.job_id = jp.job_id
 where ei.account = $1;
 -----------------------------------------
 
+--update user 密碼
+UPDATE user_login
+SET password = $1
+WHERE account = $2;
+
+--update user information
+UPDATE user_information
+SET phone = $1, first_name = $2, last_name = $3
+WHERE account = $4;
+
+--update employer 密碼
+UPDATE employer_login
+SET password = $1
+WHERE account = $2;
+
+--update user information
+UPDATE employer_information
+SET company_name = $1, established_year = $2, company_address = $3
+WHERE account = $4;
+-------------------------------------------------------
+
 -- 接受某個application
 UPDATE application
 SET application_status = 'Accepted'
