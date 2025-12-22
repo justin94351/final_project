@@ -306,3 +306,16 @@ body::before{
 #formTitle {
     margin: 10px 20px -20px 20px;
 }
+
+.helper-text{
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+}
+
+.to-login, .to-register{
+  width: 100%;
+}
