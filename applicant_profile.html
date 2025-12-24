@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <title>Applicant Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>My Profile</h1>
+
+        <form id="profileForm">
+            <div class="input-box">
+                <input type="text" id="name" placeholder="Full Name" required />
+                <i class="bx bx-user"></i>
+            </div>
+
+            <div class="input-box">
+                <input type="email" id="email" placeholder="Email" required />
+                <i class="bx bx-envelope"></i>
+            </div>
+
+            <div class="input-box">
+                <input type="tel" id="phone" placeholder="Phone Number" required />
+                <i class="bx bx-phone"></i>
+            </div>
+
+            <div class="input-box">
+                <select id="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <div class="input-box">
+                <input type="text" id="skills" placeholder="Skills (e.g. SQL, Blockchain, Python)" />
+                <i class="bx bx-code-alt"></i>
+            </div>
+
+            <div class="input-box">
+                <textarea id="bio" rows="3" placeholder="Short Bio / Introduction"></textarea>
+            </div>
+
+            <div class="input-box">
+                <label style="display:block; font-size:14px; opacity:0.85; margin-bottom:8px;">
+                    Certification (PDF)
+                </label>
+                <input type="file" id="certification" accept="application/pdf" />
+                <i class="bx bx-file"></i>
+            </div>
+
+            <div class="finalbtn">
+                <button type="submit" class="btn">Save Profile</button>
+                <button type="button" id="toDashboardBtn" class="btn">
+                    Go To Dashboard
+                </button>
+            </div>
+
+            <div class="finalbtn" style="margin-top:10px;">
+                <button type="button" id="logoutBtn" class="btn">Logout</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        // 如需強制登入檢查可打開
+        /*
+        if (!token || role !== 'applicant') {
+          alert('Unauthorized');
+          location.href = 'login.html';
+        }
+        */
+
+        document.getElementById('toDashboardBtn').addEventListener('click', () => {
+            location.href = 'applicant_dashboard.html';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            location.href = 'login.html';
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value.trim());
+            formData.append('email', document.getElementById('email').value.trim());
+            formData.append('phone', document.getElementById('phone').value.trim());
+
+            formData.append('gender', document.getElementById('gender').value);
+            formData.append('skills', document.getElementById('skills').value.trim());
+            formData.append('bio', document.getElementById('bio').value.trim());
+
+            const file = document.getElementById('certification').files[0];
+            if (file) formData.append('certification', file);
+
+            try {
+                const res = await fetch('/api/applicant/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    alert(data.message || 'Failed to save profile');
+                    return;
+                }
+
+                alert('Profile saved successfully!');
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        });
+    </script>
+</body>
+</html>
+
