@@ -1,0 +1,444 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <title>Applicant Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css" />
+    <style>
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .stat-card {
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            margin-top: 6px;
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .toolbar {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .toolbar-left, .toolbar-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .mini-btn {
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.18);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .mini-btn:hover {
+                transform: translateY(-1px);
+                background: rgba(0,0,0,0.28);
+            }
+
+        .select-like {
+            height: 40px;
+            border-radius: 999px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.18);
+            color: #fff;
+            padding: 0 12px;
+            outline: none;
+        }
+
+        .table-btn {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.18);
+            color: #fff;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+
+            .table-btn:hover {
+                background: rgba(0,0,0,0.28);
+            }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+        }
+
+        /* select 在 style.css 沒定義，補一個和 input 相近 */
+        .input-box select {
+            width: 100%;
+            height: 50px;
+            background: rgba(0,0,0,0.15);
+            outline: none;
+            border: 2px solid rgba(255, 255, 255, .2);
+            border-radius: 40px;
+            font-size: 16px;
+            color: #fff;
+            padding: 0px 45px 0px 20px;
+        }
+
+            .input-box select option {
+                color: #000;
+            }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>Applicant Dashboard</h1>
+
+        <section>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-title"><i class="bx bx-file"></i>Total</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="bx bx-check-circle"></i>Accepted</div>
+                    <div class="stat-value" id="statAccepted">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="bx bx-time-five"></i>Pending</div>
+                    <div class="stat-value" id="statPending">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title"><i class="bx bx-x-circle"></i>Rejected</div>
+                    <div class="stat-value" id="statRejected">0</div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button class="mini-btn" id="refreshBtn">
+                        <i class="bx bx-refresh"></i> refresh
+                    </button>
+
+                    <select class="select-like" id="statusFilter">
+                        <option value="ALL">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-right">
+                    <button class="mini-btn" id="logoutBtn">
+                        <i class="bx bx-log-out"></i> logout
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- 申請列表 -->
+        <section>
+            <h2 id="appTitle" style="margin: 10px 20px;">My Applications</h2>
+            <div class="table-wrap">
+                <table border="1" id="appTable">
+                    <thead>
+                        <tr>
+                            <th>Application Id</th>
+                            <th>Job Id</th>
+                            <th>Job Title</th>
+                            <th>Status</th>
+                            <th>Applied At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS 填資料 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr />
+
+        <!-- 新增申請 -->
+        <section>
+            <h2 id="formTitle" style="margin: 10px 20px -20px 20px;">Create New Application</h2>
+
+            <form id="applyForm">
+                <div class="input-box">
+                    <input type="number" id="jobId" placeholder="Job ID" required />
+                    <i class="bx bx-briefcase"></i>
+                </div>
+
+                <div class="input-box">
+                    <textarea id="note" rows="3" placeholder="Note / Message (optional)"></textarea>
+                </div>
+
+                <div class="finalbtn">
+                    <button type="submit" class="btn" id="applyBtn">Add New Application</button>
+
+                    <button type="button" class="btn" id="toProfileBtn">Go To Profile</button>
+                </div>
+            </form>
+
+        </section>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token') || '';
+        const role = localStorage.getItem('role');
+
+        // 如果已經有 applicant 的登入流程，可打開這段強制檢查：
+        /*
+        if (!token || role !== 'applicant') {
+          alert('You are not authorized to view this page.');
+          window.location.href = 'login.html';
+        }
+        */
+
+        // ====== 1) DOM ======
+        const appTableBody = document.querySelector('#appTable tbody');
+        const statTotal = document.getElementById('statTotal');
+        const statAccepted = document.getElementById('statAccepted');
+        const statPending = document.getElementById('statPending');
+        const statRejected = document.getElementById('statRejected');
+
+        const refreshBtn = document.getElementById('refreshBtn');
+        const statusFilter = document.getElementById('statusFilter');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const applyForm = document.getElementById('applyForm');
+        const jobIdInput = document.getElementById('jobId');
+        const noteInput = document.getElementById('note');
+
+        const toProfileBtn = document.getElementById('toProfileBtn');
+        toProfileBtn.addEventListener('click', () => {
+            // 這裡填實際的 profile 檔名
+            window.location.href = 'applicant_profile.html';
+        });
+
+        // 登出
+        logoutBtn.addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        // ====== 2) API 路徑（可依後端調整）======
+        const API_LIST = '/api/applicant/applications';
+        const API_CREATE = '/api/applicant/applications';
+        const API_CANCEL = (id) => `/api/applicant/applications/${id}`;
+
+        // ====== 3) 小工具：統一處理 fetch 的錯誤訊息 ======
+        async function safeJson(res) {
+            try { return await res.json(); } catch (_) { return {}; }
+        }
+
+        function setLoadingRow() {
+            appTableBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+        }
+
+        function setEmptyRow(msg) {
+            appTableBody.innerHTML = `<tr><td colspan="6">${msg}</td></tr>`;
+        }
+
+        // ====== 4) 載入申請列表 + 統計 ======
+        let cachedApplications = []; // 供 filter 使用
+
+        async function loadApplications() {
+            setLoadingRow();
+
+            try {
+                const res = await fetch(API_LIST, {
+                    headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+                });
+
+                if (!res.ok) {
+                    const data = await safeJson(res);
+                    throw new Error(data.message || 'Failed to fetch applications');
+                }
+
+                const apps = await res.json();
+                cachedApplications = Array.isArray(apps) ? apps : [];
+
+                renderApplications();
+                renderStats(cachedApplications);
+
+            } catch (err) {
+                console.error(err);
+                setEmptyRow('Error loading applications.');
+                renderStats([]);
+            }
+        }
+
+        function renderStats(apps) {
+            const total = apps.length;
+            const accepted = apps.filter(a => (a.status || a.application_status) === 'Accepted').length;
+            const pending = apps.filter(a => (a.status || a.application_status) === 'Pending').length;
+            const rejected = apps.filter(a => (a.status || a.application_status) === 'Rejected').length;
+
+            statTotal.textContent = total;
+            statAccepted.textContent = accepted;
+            statPending.textContent = pending;
+            statRejected.textContent = rejected;
+        }
+
+        function normalizeApp(app) {
+            return {
+                application_id: app.application_id ?? app.id ?? '',
+                job_id: app.job_id ?? app.jobId ?? '',
+                job_title: app.job_title ?? app.title ?? '',
+                status: app.status ?? app.application_status ?? 'Pending',
+                applied_at: app.applied_at ?? app.created_at ?? ''
+            };
+        }
+
+        function renderApplications() {
+            const filter = statusFilter.value;
+
+            const list = cachedApplications
+                .map(normalizeApp)
+                .filter(a => filter === 'ALL' ? true : a.status === filter);
+
+            if (list.length === 0) {
+                setEmptyRow(filter === 'ALL' ? 'No applications yet.' : 'No applications in this status.');
+                return;
+            }
+
+            appTableBody.innerHTML = '';
+            list.forEach(a => {
+                const tr = document.createElement('tr');
+
+                const cancelDisabled = (a.status !== 'Pending'); // 只允許取消 Pending
+                tr.innerHTML = `
+                    <td>${a.application_id}</td>
+                    <td>${a.job_id}</td>
+                    <td>${a.job_title || ''}</td>
+                    <td>${a.status}</td>
+                    <td>${a.applied_at || ''}</td>
+                    <td>
+                      <button class="table-btn cancelBtn" data-id="${a.application_id}" ${cancelDisabled ? 'disabled title="Only pending applications can be canceled."' : ''}>
+                        Cancel
+                      </button>
+                    </td>
+                  `;
+
+                appTableBody.appendChild(tr);
+            });
+
+            // 綁定取消按鈕
+            document.querySelectorAll('.cancelBtn').forEach(btn => {
+                if (btn.disabled) return;
+                btn.addEventListener('click', () => cancelApplication(btn.dataset.id));
+            });
+        }
+
+        // ====== 5) 新增申請 ======
+        applyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const job_id = Number(jobIdInput.value);
+            const note = noteInput.value.trim();
+
+            if (!job_id) {
+                alert('Job Id is required.');
+                return;
+            }
+
+            const payload = { job_id, note };
+
+            try {
+                const res = await fetch(API_CREATE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await safeJson(res);
+
+                if (!res.ok) {
+                    alert(data.message || 'Failed to create application');
+                    return;
+                }
+
+                alert('Application submitted!');
+                jobIdInput.value = '';
+                noteInput.value = '';
+                loadApplications();
+
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        });
+
+        // ====== 6) 取消申請 ======
+        async function cancelApplication(applicationId) {
+            if (!confirm('Cancel this application?')) return;
+
+            try {
+                const res = await fetch(API_CANCEL(applicationId), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+                });
+
+                const data = await safeJson(res);
+
+                if (!res.ok) {
+                    alert(data.message || 'Failed to cancel application');
+                    return;
+                }
+
+                alert('Canceled!');
+                loadApplications();
+
+            } catch (err) {
+                console.error(err);
+                alert('Network error');
+            }
+        }
+
+        // ====== 7) UI 互動 ======
+        refreshBtn.addEventListener('click', loadApplications);
+        statusFilter.addEventListener('change', renderApplications);
+
+        // ====== 8) Init ======
+        loadApplications();
+    </script>
+</body>
+</html>
